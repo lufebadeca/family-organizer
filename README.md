@@ -8,7 +8,7 @@ App PWA mobile-first para gestionar tareas, gastos fijos mensuales, gastos únic
 - Tailwind CSS + componentes estilo shadcn/ui (Radix)
 - TanStack Query (cache + optimistic updates)
 - React Router
-- Supabase JS (anon key)
+- Supabase JS (publishable key)
 - `vite-plugin-pwa` (instalable en celular)
 - dayjs + lucide-react
 
@@ -19,7 +19,7 @@ App PWA mobile-first para gestionar tareas, gastos fijos mensuales, gastos únic
 1. Crea un proyecto en https://supabase.com.
 2. Abre **SQL Editor → New query** y pega el contenido de [`supabase/schema.sql`](supabase/schema.sql). Ejecuta. Esto crea las tablas, índices y vistas.
 3. (Opcional) Descomenta la sección de SEEDS al final del archivo si quieres categorías base.
-4. En **Project Settings → API**, copia `URL` y `anon public key`.
+4. En **Project Settings → API**, copia `URL` y la **publishable key** (o `anon` legacy en proyectos antiguos).
 5. En **Authentication → Settings**, desactiva email signup (no se usa).
 6. En **Database → Replication / RLS**: el script ya deja RLS deshabilitada en todas las tablas (uso personal, instancia única).
 
@@ -29,7 +29,7 @@ Crea `.env.local` (no commitear):
 
 ```bash
 VITE_SUPABASE_URL=https://<tu-proyecto>.supabase.co
-VITE_SUPABASE_ANON_KEY=<anon-key>
+VITE_SUPABASE_PUBLISHABLE_KEY=<publishable-key>
 ```
 
 ### 3. Instalar y correr
@@ -57,7 +57,7 @@ Para deploy:
 1. Crea un repositorio en GitHub con este código.
 2. En Vercel, **New Project → Import**.
 3. Framework preset: `Vite` (autodetectado).
-4. Variables de entorno: agrega `VITE_SUPABASE_URL` y `VITE_SUPABASE_ANON_KEY`.
+4. Variables de entorno: agrega `VITE_SUPABASE_URL` y `VITE_SUPABASE_PUBLISHABLE_KEY`.
 5. Deploy.
 
 El archivo `vercel.json` ya configura el rewrite para SPA routing.
@@ -104,5 +104,5 @@ Vistas:
 ## Notas
 
 - La PWA cachea assets para abrir offline, pero los datos requieren conexión a Supabase.
-- Todo va contra la `anon key` con RLS deshabilitada. Si compartes la URL, comparte también el acceso a los datos. **No subir esta app a un dominio público** salvo que estés cómodo con que cualquiera con la URL pueda leer/escribir.
+- Todo va contra la **publishable key** con RLS deshabilitada. Si compartes la URL, comparte también el acceso a los datos. **No subir esta app a un dominio público** salvo que estés cómodo con que cualquiera con la URL pueda leer/escribir.
 - Para escenarios públicos, activa RLS y agrega magic link auth con lista blanca de emails.

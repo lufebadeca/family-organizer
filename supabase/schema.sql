@@ -201,7 +201,7 @@ left join tasks_per_cat tp on tp.category_id = c.id
 where c.archived = false;
 
 -- =====================
--- RLS (deshabilitado, uso personal con anon key)
+-- RLS (deshabilitado, uso personal con publishable key)
 -- =====================
 
 alter table public.members disable row level security;
