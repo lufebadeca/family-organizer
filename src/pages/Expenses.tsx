@@ -1,11 +1,9 @@
 import { Repeat, ShoppingBag } from "lucide-react";
 import { PageHeader } from "@/components/layout/PageHeader";
-import { Card, CardContent } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Progress } from "@/components/ui/progress";
+import { ExpensesSummary } from "@/components/expenses/ExpensesSummary";
 import { FixedExpenseRow } from "@/components/items/FixedExpenseRow";
 import { OneTimeExpenseRow } from "@/components/items/OneTimeExpenseRow";
-import { formatCOP } from "@/lib/money";
 import { currentYearMonth, monthLabel } from "@/lib/dates";
 import { useFixedExpensesForMonth } from "@/lib/queries/fixedExpenses";
 import { useOneTimeExpenses } from "@/lib/queries/oneTimeExpenses";
@@ -83,85 +81,17 @@ export function Expenses() {
           </TabsContent>
 
           <TabsContent value="summary" className="space-y-3">
-            <SummaryCard
-              label="Ingreso"
-              value={summary?.income_cop ?? 0}
-              tone="primary"
+            <ExpensesSummary
+              ym={ym}
+              summary={summary}
+              fixed={fixed}
+              oneTime={oneTime}
+              categories={categories}
             />
-            <SummaryCard
-              label="Gastos fijos totales"
-              value={summary?.fixed_total_cop ?? 0}
-            />
-            <SummaryCard
-              label="Gastos fijos pagados"
-              value={summary?.fixed_paid_cop ?? 0}
-              hint={`Pendiente: ${formatCOP(summary?.fixed_pending_cop ?? 0)}`}
-            />
-            <SummaryCard
-              label="Gastos únicos del mes"
-              value={summary?.one_time_total_cop ?? 0}
-            />
-            <Card>
-              <CardContent className="space-y-2 p-4">
-                <p className="text-xs uppercase tracking-wide text-muted-foreground">
-                  Balance del mes
-                </p>
-                <p
-                  className={`text-2xl font-bold tabular-nums ${(summary?.balance_cop ?? 0) < 0 ? "text-destructive" : "text-emerald-400"}`}
-                >
-                  {formatCOP(summary?.balance_cop ?? 0)}
-                </p>
-                <Progress
-                  value={
-                    summary && summary.income_cop > 0
-                      ? Math.min(
-                          100,
-                          ((Number(summary.fixed_total_cop) +
-                            Number(summary.one_time_total_cop)) /
-                            Number(summary.income_cop)) *
-                            100,
-                        )
-                      : 0
-                  }
-                />
-              </CardContent>
-            </Card>
           </TabsContent>
         </Tabs>
       </div>
     </>
-  );
-}
-
-function SummaryCard({
-  label,
-  value,
-  tone,
-  hint,
-}: {
-  label: string;
-  value: number;
-  tone?: "primary";
-  hint?: string;
-}) {
-  return (
-    <Card>
-      <CardContent className="flex items-center justify-between p-3">
-        <div>
-          <p className="text-[11px] uppercase tracking-wide text-muted-foreground">
-            {label}
-          </p>
-          {hint && (
-            <p className="text-[10px] text-muted-foreground">{hint}</p>
-          )}
-        </div>
-        <p
-          className={`text-base font-semibold tabular-nums ${tone === "primary" ? "text-primary" : ""}`}
-        >
-          {formatCOP(value)}
-        </p>
-      </CardContent>
-    </Card>
   );
 }
 

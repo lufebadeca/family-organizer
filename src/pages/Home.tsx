@@ -2,12 +2,13 @@ import { Link } from "react-router-dom";
 import { ArrowRight, Calendar, Wallet, AlertCircle } from "lucide-react";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { Card, CardContent } from "@/components/ui/card";
-import { Progress } from "@/components/ui/progress";
+import { BudgetProgress } from "@/components/budget/BudgetProgress";
 import { Button } from "@/components/ui/button";
 import { formatCOP } from "@/lib/money";
 import { currentYearMonth, monthLabel, dayjs } from "@/lib/dates";
 import { useMonthSummary, useMonthlyBudget } from "@/lib/queries/monthlyBudget";
 import { useFixedExpensesForMonth } from "@/lib/queries/fixedExpenses";
+import { useOneTimeExpenses } from "@/lib/queries/oneTimeExpenses";
 import { useTasks } from "@/lib/queries/tasks";
 import { useCategories } from "@/lib/queries/categories";
 import { useMembers } from "@/lib/queries/members";
@@ -19,6 +20,7 @@ export function Home() {
   const { data: summary } = useMonthSummary(ym);
   const { data: budget } = useMonthlyBudget(ym);
   const { data: fixedItems = [] } = useFixedExpensesForMonth(ym);
+  const { data: oneTime = [] } = useOneTimeExpenses({ period: ym });
   const { data: tasks = [] } = useTasks({ status: "pending" });
   const { data: categories = [] } = useCategories();
   const { data: members = [] } = useMembers();
@@ -48,9 +50,13 @@ export function Home() {
     .reduce((acc, it) => acc + it.expense.amount_cop, 0);
 
   const income = summary?.income_cop ?? budget?.income_cop ?? 0;
-  const spent = (summary?.fixed_total_cop ?? 0) + (summary?.one_time_total_cop ?? 0);
-  const balance = income - spent;
-  const usagePct = income > 0 ? Math.min(100, (spent / income) * 100) : 0;
+  const committed =
+    (summary?.fixed_total_cop ?? 0) + (summary?.one_time_total_cop ?? 0);
+  const oneTimePurchased = oneTime
+    .filter((e) => e.status === "purchased" && e.include_in_monthly)
+    .reduce((acc, e) => acc + e.amount_cop, 0);
+  const paid = (summary?.fixed_paid_cop ?? 0) + oneTimePurchased;
+  const balance = income - committed;
 
   return (
     <>
@@ -71,11 +77,11 @@ export function Home() {
               </div>
               <Wallet className="h-6 w-6 text-muted-foreground" />
             </div>
-            <Progress value={usagePct} />
-            <div className="flex justify-between text-xs text-muted-foreground">
-              <span>Gastado {formatCOP(spent)}</span>
-              <span>Ingreso {formatCOP(income)}</span>
-            </div>
+            <BudgetProgress
+              income={income}
+              committed={committed}
+              paid={paid}
+            />
             {income === 0 && (
               <Link
                 to="/ajustes"
