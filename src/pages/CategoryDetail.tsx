@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useParams } from "react-router-dom";
-import { icons, Folder, Pencil, PiggyBank, Trash2 } from "lucide-react";
+import { Pencil, PiggyBank, Trash2 } from "lucide-react";
+import { getCategoryIcon } from "@/lib/categoryIcons";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { Card, CardContent } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
@@ -42,10 +43,7 @@ export function CategoryDetail() {
     );
   }
 
-  const Icon =
-    (icons[category.icon as keyof typeof icons] as
-      | React.ComponentType<{ className?: string }>
-      | undefined) ?? Folder;
+  const Icon = getCategoryIcon(category.icon);
 
   const spent = expenses.reduce((acc, e) => acc + e.amount_cop, 0);
   const budget = category.estimated_budget_cop ?? 0;

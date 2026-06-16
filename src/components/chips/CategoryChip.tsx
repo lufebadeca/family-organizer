@@ -1,6 +1,6 @@
-import { icons } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { hexWithAlpha } from "@/lib/colors";
+import { getCategoryIcon } from "@/lib/categoryIcons";
 import type { Category } from "@/lib/queries/categories";
 
 interface Props {
@@ -17,9 +17,7 @@ export function CategoryChip({
   className,
 }: Props) {
   if (!category) return null;
-  const Icon = (icons[category.icon as keyof typeof icons] ?? icons.Folder) as
-    | React.ComponentType<{ className?: string }>
-    | undefined;
+  const Icon = getCategoryIcon(category.icon);
 
   if (!showName) {
     return (

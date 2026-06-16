@@ -1,5 +1,6 @@
 import { Link } from "react-router-dom";
-import { icons, Folder, Plus } from "lucide-react";
+import { Plus } from "lucide-react";
+import { getCategoryIcon } from "@/lib/categoryIcons";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { Card } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
@@ -21,10 +22,7 @@ export function Categories() {
         ) : (
           <div className="grid grid-cols-2 gap-3">
             {summary.map((c) => {
-              const Icon =
-                (icons[c.icon as keyof typeof icons] as
-                  | React.ComponentType<{ className?: string }>
-                  | undefined) ?? Folder;
+              const Icon = getCategoryIcon(c.icon);
               const budget = c.estimated_budget_cop ?? 0;
               const usage =
                 budget > 0

@@ -8,30 +8,19 @@ import {
   SelectContent,
   SelectItem,
   SelectTrigger,
-  SelectValue,
 } from "@/components/ui/select";
 import { CATEGORY_COLORS } from "@/lib/colors";
+import {
+  CATEGORY_ICON_OPTIONS,
+  getCategoryIconLabel,
+} from "@/lib/categoryIcons";
 import { cn } from "@/lib/utils";
+import { CategoryIconBadge } from "@/components/chips/CategoryIconBadge";
 import {
   useCreateCategory,
   useUpdateCategory,
   type Category,
 } from "@/lib/queries/categories";
-
-const ICON_OPTIONS = [
-  "Folder",
-  "Home",
-  "UtensilsCrossed",
-  "PiggyBank",
-  "Plane",
-  "Hammer",
-  "Car",
-  "Heart",
-  "Gift",
-  "GraduationCap",
-  "ShoppingBag",
-  "Sparkles",
-];
 
 interface Props {
   initial?: Category;
@@ -106,12 +95,18 @@ export function CategoryForm({ initial, onDone }: Props) {
         <Label>Icono</Label>
         <Select value={icon} onValueChange={setIcon}>
           <SelectTrigger>
-            <SelectValue />
+            <span className="flex items-center gap-2">
+              <CategoryIconBadge icon={icon} color={color} />
+              <span>{getCategoryIconLabel(icon)}</span>
+            </span>
           </SelectTrigger>
           <SelectContent>
-            {ICON_OPTIONS.map((i) => (
-              <SelectItem key={i} value={i}>
-                {i}
+            {CATEGORY_ICON_OPTIONS.map((option) => (
+              <SelectItem key={option.value} value={option.value}>
+                <span className="flex items-center gap-2">
+                  <CategoryIconBadge icon={option.value} color={color} />
+                  <span>{option.label}</span>
+                </span>
               </SelectItem>
             ))}
           </SelectContent>
