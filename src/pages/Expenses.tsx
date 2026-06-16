@@ -4,7 +4,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ExpensesSummary } from "@/components/expenses/ExpensesSummary";
 import { FixedExpenseRow } from "@/components/items/FixedExpenseRow";
 import { OneTimeExpenseRow } from "@/components/items/OneTimeExpenseRow";
-import { currentYearMonth, monthLabel } from "@/lib/dates";
+import { currentYearMonth, isInYearMonth, monthLabel } from "@/lib/dates";
 import { useFixedExpensesForMonth } from "@/lib/queries/fixedExpenses";
 import { useOneTimeExpenses } from "@/lib/queries/oneTimeExpenses";
 import { useMonthSummary } from "@/lib/queries/monthlyBudget";
@@ -14,10 +14,19 @@ import { useMembers } from "@/lib/queries/members";
 export function Expenses() {
   const ym = currentYearMonth();
   const { data: fixed = [] } = useFixedExpensesForMonth(ym);
-  const { data: oneTime = [] } = useOneTimeExpenses({ period: ym });
+  const { data: oneTimeAll = [] } = useOneTimeExpenses({ fromPeriod: ym });
   const { data: summary } = useMonthSummary(ym);
   const { data: categories = [] } = useCategories();
   const { data: members = [] } = useMembers();
+
+  const oneTimeCurrent = oneTimeAll.filter((e) =>
+    isInYearMonth(e.expense_date, ym),
+  );
+  const oneTimeFuture = oneTimeAll
+    .filter((e) => !isInYearMonth(e.expense_date, ym))
+    .sort((a, b) => a.expense_date.localeCompare(b.expense_date));
+  const futureByMonth = groupBy(oneTimeFuture, (e) => e.expense_date.slice(0, 7));
+  const futureMonths = Object.keys(futureByMonth).sort();
 
   const fixedByDay = groupBy(fixed, (it) => String(it.expense.payment_day));
   const sortedDays = Object.keys(fixedByDay)
@@ -62,21 +71,45 @@ export function Expenses() {
             )}
           </TabsContent>
 
-          <TabsContent value="one-time" className="space-y-1.5">
-            {oneTime.length === 0 ? (
+          <TabsContent value="one-time" className="space-y-3">
+            {oneTimeCurrent.length === 0 && oneTimeFuture.length === 0 ? (
               <EmptyState
                 icon={<ShoppingBag className="h-5 w-5" />}
                 text="Sin gastos únicos este mes"
               />
             ) : (
-              oneTime.map((e) => (
-                <OneTimeExpenseRow
-                  key={e.id}
-                  expense={e}
-                  category={categories.find((c) => c.id === e.category_id)}
-                  member={members.find((m) => m.id === e.assignee_id)}
-                />
-              ))
+              <>
+                {oneTimeCurrent.length > 0 && (
+                  <div className="space-y-1.5">
+                    {oneTimeCurrent.map((e) => (
+                      <OneTimeExpenseRow
+                        key={e.id}
+                        expense={e}
+                        category={categories.find((c) => c.id === e.category_id)}
+                        member={members.find((m) => m.id === e.assignee_id)}
+                      />
+                    ))}
+                  </div>
+                )}
+                {futureMonths.map((monthKey) => (
+                  <div key={monthKey} className="space-y-1.5">
+                    <p className="px-1 text-[11px] uppercase tracking-wide text-muted-foreground">
+                      {monthLabel({
+                        year: Number(monthKey.slice(0, 4)),
+                        month: Number(monthKey.slice(5, 7)),
+                      })}
+                    </p>
+                    {futureByMonth[monthKey]!.map((e) => (
+                      <OneTimeExpenseRow
+                        key={e.id}
+                        expense={e}
+                        category={categories.find((c) => c.id === e.category_id)}
+                        member={members.find((m) => m.id === e.assignee_id)}
+                      />
+                    ))}
+                  </div>
+                ))}
+              </>
             )}
           </TabsContent>
 
@@ -85,7 +118,7 @@ export function Expenses() {
               ym={ym}
               summary={summary}
               fixed={fixed}
-              oneTime={oneTime}
+              oneTime={oneTimeCurrent}
               categories={categories}
             />
           </TabsContent>

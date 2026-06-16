@@ -1,7 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/lib/supabase";
 import type { Tables, TablesInsert, TablesUpdate } from "@/types/database";
-import type { YearMonth } from "@/lib/dates";
+import { yearMonthStart, type YearMonth } from "@/lib/dates";
 
 export type OneTimeExpense = Tables<"one_time_expenses">;
 
@@ -9,6 +9,8 @@ export interface OneTimeExpenseFilters {
   categoryId?: string | null;
   status?: "planned" | "purchased" | "all";
   period?: YearMonth;
+  fromPeriod?: YearMonth;
+  fromDate?: string;
 }
 
 const BASE_KEY = ["one-time-expenses"] as const;
@@ -32,11 +34,16 @@ export function useOneTimeExpenses(filters: OneTimeExpenseFilters = {}) {
       }
       if (filters.period) {
         const { year, month } = filters.period;
-        const start = `${year}-${String(month).padStart(2, "0")}-01`;
+        const start = yearMonthStart({ year, month });
         const endMonth = month === 12 ? 1 : month + 1;
         const endYear = month === 12 ? year + 1 : year;
         const end = `${endYear}-${String(endMonth).padStart(2, "0")}-01`;
         q = q.gte("expense_date", start).lt("expense_date", end);
+      } else if (filters.fromPeriod) {
+        q = q.gte("expense_date", yearMonthStart(filters.fromPeriod));
+      }
+      if (filters.fromDate) {
+        q = q.gte("expense_date", filters.fromDate);
       }
       const { data, error } = await q;
       if (error) throw error;

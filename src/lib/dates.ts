@@ -39,6 +39,15 @@ export function formatDueDate(date: string | null | undefined): string {
   return dayjs(date).format("D MMM");
 }
 
+export function yearMonthStart({ year, month }: YearMonth): string {
+  return `${year}-${String(month).padStart(2, "0")}-01`;
+}
+
+export function isInYearMonth(date: string, ym: YearMonth): boolean {
+  const d = dayjs(date);
+  return d.year() === ym.year && d.month() + 1 === ym.month;
+}
+
 export function paymentDateForMonth(
   paymentDay: number,
   { year, month }: YearMonth,
