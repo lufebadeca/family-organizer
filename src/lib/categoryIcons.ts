@@ -34,6 +34,9 @@ export const CATEGORY_ICON_OPTIONS = [
   { value: "Shirt", label: "Ropa" },
   { value: "Smartphone", label: "Tecnología" },
   { value: "BookOpen", label: "Lectura" },
+  { value: "Zap", label: "Energía" },
+  { value: "Droplet", label: "Agua" },
+  { value: "Wifi", label: "Internet" },
 ] as const;
 
 export type CategoryIconName = (typeof CATEGORY_ICON_OPTIONS)[number]["value"];
